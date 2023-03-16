@@ -1,4 +1,3 @@
-#### ChatGPT:
 # DEVLEGO: A Simple Way to Kickstart Your Development Journey
 
 ## Overview
