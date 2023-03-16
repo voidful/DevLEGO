@@ -1,0 +1,28 @@
+version: '3'
+
+services:
+  main:
+    build:
+      context: .
+      args:
+        - USERNAME=devlego
+        - PASSWORD=changeme
+    environment:
+      - USERNAME=devlego
+      - PASSWORD=changeme
+    privileged: true
+    restart: always
+    stdin_open: true
+    tty: true
+    volumes:
+      - /home/:/mount_home
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [ gpu ]
+
+networks:
+  default:
+    external: true
+    name: devlego
