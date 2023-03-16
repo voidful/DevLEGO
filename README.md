@@ -1,4 +1,4 @@
-# DEVLEGO: A Simple Way to Kickstart Your Development Journey
+# DevLEGO: A Simple Way to Kickstart Your Development Journey
 
 ## Overview
 
@@ -21,7 +21,7 @@ git clone https://github.com/voidful/DevLEGO.git
 
 ### Step 2: Create a Docker Network
 
-```lua
+```bash
 docker network create deblego
 ```
 
