@@ -1,4 +1,4 @@
-# DEVLEGO: A Simple Way to Kickstart Your Development Journey
+# DevLEGO: A Simple Way to Kickstart Your Development Journey
 
 ## Overview
 
@@ -21,7 +21,7 @@ git clone https://github.com/voidful/DevLEGO.git
 
 ### Step 2: Create a Docker Network
 
-```lua
+```bash
 docker network create deblego
 ```
 
@@ -29,7 +29,7 @@ docker network create deblego
 
 #### Essential Changes:
 
-- Dockerfile -  change the base images
+- Dockerfile - change the base images
 - docker-compose.yml - change username, password, container name, mount volume, etc.
 
 #### Optional Changes:
@@ -53,7 +53,7 @@ docker-compose up -d
 ### Step 6: Set up Nginx for DevLEGO Access
 
 ## References
-[Inspire By pojntfx/pojde](https://github.com/pojntfx/pojde)  
+
+[Inspire By pojntfx/pojde](https://github.com/pojntfx/pojde)
 
 [Change Docker Default Data Directory](https://gist.github.com/plembo/0070059bde27bb8fb37735a899b16e41)
-
