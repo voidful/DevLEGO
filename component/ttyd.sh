@@ -4,9 +4,6 @@
 . /opt/legodev/versions.sh
 # Read ports
 . /opt/legodev/ports.sh
-# Read users
-. /opt/legodev/user.sh
-
 
 # Download the binary
 VERSION="${TTYD_VERSION}"

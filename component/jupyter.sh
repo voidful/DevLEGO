@@ -4,8 +4,6 @@
 . /opt/legodev/versions.sh
 # Read ports
 . /opt/legodev/ports.sh
-# Read users
-. /opt/legodev/user.sh
 
 # Install pip
 apt install -y python3-pip libffi-dev

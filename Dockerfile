@@ -18,7 +18,6 @@ WORKDIR /opt/legodev
 # Add versions
 COPY versions.sh .
 COPY ports.sh .
-COPY user.sh .
 
 COPY component/init.sh .
 RUN bash ./init.sh
@@ -41,8 +40,17 @@ ENV SHELL=/bin/bash
 RUN useradd -m $USERNAME
 RUN echo $USERNAME:$PASSWORD | chpasswd
 RUN usermod -aG root $USERNAME
+RUN adduser $USERNAME sudo
+RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> \
+/etc/sudoers
 RUN chsh -s /bin/bash $USERNAME
 RUN su - $USERNAME
-USER $USERNAME
+RUN mkdir /user_data
+RUN usermod -d /user_data $USERNAME
+RUN cp /etc/skel/.bashrc /user_data; cp /etc/skel/.profile /user_data
+RUN mkdir /user_data/.jupyter; chmod -R 775 /user_data/.jupyter
+RUN chown -R $USERNAME:$USERNAME /user_data
 
+USER $USERNAME
+WORKDIR /user_data
 ENTRYPOINT /opt/legodev/start.sh && /bin/bash

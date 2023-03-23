@@ -4,8 +4,6 @@
 . /opt/legodev/versions.sh
 # Read ports
 . /opt/legodev/ports.sh
-# Read users
-. /opt/legodev/user.sh
 
 # Install OpenSSH server
 apt install -y openssh-server

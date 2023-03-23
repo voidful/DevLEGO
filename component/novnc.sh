@@ -4,8 +4,6 @@
 . /opt/legodev/versions.sh
 # Read ports
 . /opt/legodev/ports.sh
-# Read users
-. /opt/legodev/user.sh
 
 # Install noVNC
 apt install -y xvfb x11vnc novnc net-tools

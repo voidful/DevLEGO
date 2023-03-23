@@ -15,7 +15,9 @@ services:
     stdin_open: true
     tty: true
     volumes:
+#     <source>:<target>
       - /home/:/mount_home
+      - ./data:/user_data
     deploy:
       resources:
         reservations:
