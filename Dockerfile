@@ -47,9 +47,6 @@ RUN chsh -s /bin/bash $USERNAME
 RUN su - $USERNAME
 RUN mkdir /user_data
 RUN usermod -d /user_data $USERNAME
-RUN cp /etc/skel/.bashrc /user_data; cp /etc/skel/.profile /user_data
-RUN mkdir /user_data/.jupyter; chmod -R 775 /user_data/.jupyter
-RUN chown -R $USERNAME:$USERNAME /user_data
 
 USER $USERNAME
 WORKDIR /user_data
