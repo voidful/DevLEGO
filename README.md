@@ -54,6 +54,6 @@ docker-compose up -d
 
 ## References
 
-[Inspire By pojntfx/pojde](https://github.com/pojntfx/pojde)
-
-[Change Docker Default Data Directory](https://gist.github.com/plembo/0070059bde27bb8fb37735a899b16e41)
+[Inspire By pojntfx/pojde](https://github.com/pojntfx/pojde)  
+[Inspire By p208p2002/docker-for-ai-dev](https://github.com/p208p2002/docker-for-ai-dev)   
+[Change Docker Default Data Directory](https://gist.github.com/plembo/0070059bde27bb8fb37735a899b16e41)  
