@@ -22,7 +22,7 @@ git clone https://github.com/voidful/DevLEGO.git
 ### Step 2: Create a Docker Network
 
 ```bash
-docker network create deblego
+docker network create devlego
 ```
 
 ### Step 3: Customize the Configuration

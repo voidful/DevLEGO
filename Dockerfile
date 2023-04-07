@@ -31,6 +31,9 @@ RUN bash ./code-server.sh
 COPY component/jupyter.sh .
 RUN bash ./jupyter.sh
 
+COPY component/ttyd.sh .
+RUN bash ./ttyd.sh
+
 WORKDIR /home/
 COPY start.sh /opt/legodev/
 RUN chmod +x /opt/legodev/start.sh

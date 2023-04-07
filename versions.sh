@@ -1,5 +1,5 @@
 export CODE_SERVER_VERSION="4.10.1"                 # https://github.com/cdr/code-server/releases
-export TTYD_VERSION="1.6.3"                         # https://github.com/tsl0922/ttyd/releases
+export TTYD_VERSION="1.7.3"                         # https://github.com/tsl0922/ttyd/releases
 export WEBWORMHOLE_VERSION="latest"                 # https://github.com/pojntfx/webwormhole-binaries/releases/tag/latest
 export CMAKE_FORMAT_EXTENSION_VERSION="0.6.13"      # https://github.com/cheshirekow/cmake_format/releases
 export GO_VERSION="1.17"                            # https://golang.org/dl/
