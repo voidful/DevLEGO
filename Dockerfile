@@ -34,13 +34,14 @@ RUN bash ./jupyter.sh
 COPY component/ttyd.sh .
 RUN bash ./ttyd.sh
 
+COPY component/conda.sh .
+RUN sudo bash ./conda.sh
+
 WORKDIR /home/
-COPY start.sh /opt/legodev/
-RUN chmod +x /opt/legodev/start.sh
 ENV SHELL=/bin/bash
 
 # set user info
-RUN useradd -m $USERNAME
+RUN useradd -m -d /user_data $USERNAME
 RUN echo $USERNAME:$PASSWORD | chpasswd
 RUN usermod -aG root $USERNAME
 RUN adduser $USERNAME sudo
@@ -48,9 +49,11 @@ RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> \
 /etc/sudoers
 RUN chsh -s /bin/bash $USERNAME
 RUN su - $USERNAME
-RUN mkdir /user_data
+RUN mkdir -p /user_data
 RUN usermod -d /user_data $USERNAME
-
 USER $USERNAME
 WORKDIR /user_data
+ENTRYPOINT /bin/bash
+COPY start.sh /opt/legodev/
+RUN sudo chmod +x /opt/legodev/start.sh
 ENTRYPOINT /opt/legodev/start.sh && /bin/bash

@@ -5,12 +5,14 @@
 # Read ports
 . /opt/legodev/ports.sh
 
-cp /etc/skel/.bashrc /user_data;
-cp /etc/skel/.profile /user_data
-chown -R $USERNAME:$USERNAME /user_data
+sudo chown -R $USERNAME:$USERNAME /user_data
+cp /etc/skel/.bashrc /user_data/
+cp /etc/skel/.profile /user_data/
 
-mkdir /user_data/.jupyter;
-chmod -R 775 /user_data/.jupyter
+sudo chown -R $USERNAME:$USERNAME /opt/legodev
+source /opt/legodev/miniconda/etc/profile.d/conda.sh
+sudo echo "source $HOME/miniconda/etc/profile.d/conda.sh" >>$HOME/.bashrc
+conda init
 
 screen -S code-server -dm code-server --host 0.0.0.0 --config /opt/legodev/code-server/code-server.yaml
 sleep 2
