@@ -9,7 +9,7 @@
 apt install -y python3-pip libffi-dev
 
 # Install Node (JupyterLab extensions depend on it)
-curl -fsSL https://deb.nodesource.com/setup_14.x | bash -
+curl -fsSL https://deb.nodesource.com/setup_lts.x | bash -
 apt install -y nodejs build-essential
 
 # Install
