@@ -16,7 +16,7 @@ conda init
 conda activate base
 
 # Install nb_conda_kernels to allow Jupyter to read Conda environments
-conda install -c conda-forge nb_conda_kernels
+conda install -y -c conda-forge nb_conda_kernel
 
 # Configure Jupyter to recognize all Conda environments under /user_data/miniconda3/envs
 export CONDA_ENVS_PATH=/user_data/miniconda3/envs
