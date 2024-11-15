@@ -1,7 +1,7 @@
 # Build from official Nvidia PyTorch image
 # https://ngc.nvidia.com/catalog/containers/nvidia:pytorch
-# Tags: https://catalog.ngc.nvidia.com/orgs/nvidia/containers/pytorch/tags
-FROM nvcr.io/nvidia/mxnet:24.10-py3
+# Tags: https://catalog.ngc.nvidia.com/orgs/nvidia/containers/mxnet/tags
+FROM nvcr.io/nvidia/mxnet:24.06-py3
 #FROM ubuntu
 
 # Disable interactive prompts
