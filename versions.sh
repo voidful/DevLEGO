@@ -1,4 +1,4 @@
-export CODE_SERVER_VERSION="4.96.0" # https://github.com/cdr/code-server/releases (Latest as of Apr 2025)
+export CODE_SERVER_VERSION="4.98.2" # https://github.com/cdr/code-server/releases (Latest as of Apr 2025)
 export TTYD_VERSION="1.7.8" # https://github.com/tsl0922/ttyd/releases (Latest as of Apr 2025)
 export WEBWORMHOLE_VERSION="latest" # https://github.com/pojntfx/webwormhole-binaries/releases/tag/latest (Keeping "latest" as requested)
 export CMAKE_FORMAT_EXTENSION_VERSION="0.7.0" # https://github.com/cheshirekow/cmake_format/releases (Latest as of Apr 2025)
