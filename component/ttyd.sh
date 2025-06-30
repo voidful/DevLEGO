@@ -7,5 +7,5 @@
 
 # Download the binary
 VERSION="${TTYD_VERSION}"
-curl -L -o /usr/bin/ttyd https://github.com/tsl0922/ttyd/releases/download/${VERSION}/ttyd.$(uname -m)
+curl -L -o /usr/bin/ttyd "https://github.com/tsl0922/ttyd/releases/download/${VERSION}/ttyd.$(uname -m)"
 chmod +x /usr/bin/ttyd
