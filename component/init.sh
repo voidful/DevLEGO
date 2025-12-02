@@ -50,3 +50,7 @@ packages=(
 # Download all common packages
 apt-get install -y "${packages[@]}"
 
+# Install uv
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+

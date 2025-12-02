@@ -13,4 +13,8 @@ curl -fsSL https://deb.nodesource.com/setup_lts.x | bash -
 apt install -y nodejs build-essential
 
 # Install
-pip3 install jupyterlab notebook jupyter-server
+# Install
+# Use uv to install
+export PATH="/root/.cargo/bin:$PATH"
+uv pip install --system jupyterlab notebook jupyter-server ipykernel
+

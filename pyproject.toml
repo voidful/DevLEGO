@@ -1,0 +1,12 @@
+[project]
+name = "devlego-1"
+version = "0.1.1"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "ipykernel>=7.1.0",
+    "jupyter-server>=2.17.0",
+    "jupyterlab>=4.5.0",
+    "notebook>=7.5.0",
+]
