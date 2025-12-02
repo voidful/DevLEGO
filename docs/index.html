@@ -176,23 +176,11 @@
             if (enableJupyterNotebook) ports.push(`-p ${jupyterNotebookPort}:38003`);
             if (enableTtyd) ports.push(`-p ${ttydPort}:38004`);
 
-            // Add env vars for ports if they differ from default (optional, but good for consistency if the container uses them)
-            // For now, we assume the container uses fixed internal ports or we map external to internal.
-            // The start.sh uses env vars for ports? Let's check ports.sh.
-            // ports.sh exports vars. We might need to override them if we want to change INTERNAL ports,
-            // but usually docker maps External:Internal.
-            // Let's assume standard internal ports for now or that ports.sh is used inside.
-            // Actually, start.sh sources ports.sh. If we want to change the port the service LISTENS on inside, we need to pass env vars.
-            // But usually we just map external ports.
-            // Let's stick to mapping external ports to the default internal ports defined in ports.sh (which seem to be 38001 etc).
-            // Wait, ports.sh defines the ports used by the services.
-            // So we should map External:38001, External:38002 etc.
-
             const command = `docker run -d \\
   --name devlego \\
   --privileged \\
-  ${envVars.join(' \\\\n  ')} \\
-  ${ports.join(' \\\\n  ')} \\
+  ${envVars.join(' \\ \n  ')} \\
+  ${ports.join(' \\ \n  ')} \\
   -v $(pwd)/data:/user_data \\
   voidful/devlego-1`;
 
