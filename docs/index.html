@@ -116,6 +116,9 @@
                 <label>
                     <input type="checkbox" id="enableTtyd" checked> Enable TTYD (Web Terminal)
                 </label>
+                <label>
+                    <input type="checkbox" id="enableWgEasy" checked> Enable wg-easy (WireGuard VPN)
+                </label>
             </div>
         </div>
 
@@ -142,6 +145,14 @@
                     <label for="ttydPort">TTYD Port</label>
                     <input type="number" id="ttydPort" value="38004">
                 </div>
+                <div>
+                    <label for="wgEasyPort">wg-easy Web UI Port</label>
+                    <input type="number" id="wgEasyPort" value="51821">
+                </div>
+                <div>
+                    <label for="wgPort">WireGuard VPN Port (UDP)</label>
+                    <input type="number" id="wgPort" value="51820">
+                </div>
             </div>
         </div>
 
@@ -156,18 +167,22 @@
             const enableJupyterLab = document.getElementById('enableJupyterLab').checked;
             const enableJupyterNotebook = document.getElementById('enableJupyterNotebook').checked;
             const enableTtyd = document.getElementById('enableTtyd').checked;
+            const enableWgEasy = document.getElementById('enableWgEasy').checked;
 
             const sshPort = document.getElementById('sshPort').value;
             const codeServerPort = document.getElementById('codeServerPort').value;
             const jupyterLabPort = document.getElementById('jupyterLabPort').value;
             const jupyterNotebookPort = document.getElementById('jupyterNotebookPort').value;
             const ttydPort = document.getElementById('ttydPort').value;
+            const wgEasyPort = document.getElementById('wgEasyPort').value;
+            const wgPort = document.getElementById('wgPort').value;
 
             let envVars = [];
             if (!enableCodeServer) envVars.push('-e ENABLE_CODE_SERVER=false');
             if (!enableJupyterLab) envVars.push('-e ENABLE_JUPYTER_LAB=false');
             if (!enableJupyterNotebook) envVars.push('-e ENABLE_JUPYTER_NOTEBOOK=false');
             if (!enableTtyd) envVars.push('-e ENABLE_TTYD=false');
+            if (!enableWgEasy) envVars.push('-e ENABLE_WG_EASY=false');
 
             let ports = [];
             ports.push(`-p ${sshPort}:22`);
@@ -175,6 +190,10 @@
             if (enableJupyterLab) ports.push(`-p ${jupyterLabPort}:38002`);
             if (enableJupyterNotebook) ports.push(`-p ${jupyterNotebookPort}:38003`);
             if (enableTtyd) ports.push(`-p ${ttydPort}:38004`);
+            if (enableWgEasy) {
+                ports.push(`-p ${wgEasyPort}:51821`);
+                ports.push(`-p ${wgPort}:51820/udp`);
+            }
 
             const command = `docker run -d \\
   --name devlego \\
