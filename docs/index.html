@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevLEGO Builder</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .section {
+            margin-bottom: 20px;
+        }
+
+        .section h2 {
+            margin-bottom: 10px;
+            font-size: 1.2em;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 5px;
+        }
+
+        .checkbox-group label {
+            display: block;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+
+        .input-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input[type="text"],
+        input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        #output {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            word-break: break-all;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>DevLEGO Builder</h1>
+        <p>Select the components you want to include in your DevLEGO environment and generate the startup command.</p>
+
+        <div class="section">
+            <h2>Components</h2>
+            <div class="checkbox-group">
+                <label>
+                    <input type="checkbox" id="enableCodeServer" checked> Enable Code Server (VS Code)
+                </label>
+                <label>
+                    <input type="checkbox" id="enableJupyterLab" checked> Enable Jupyter Lab
+                </label>
+                <label>
+                    <input type="checkbox" id="enableJupyterNotebook" checked> Enable Jupyter Notebook
+                </label>
+                <label>
+                    <input type="checkbox" id="enableTtyd" checked> Enable TTYD (Web Terminal)
+                </label>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Ports Configuration</h2>
+            <div class="input-group">
+                <div>
+                    <label for="sshPort">SSH Port</label>
+                    <input type="number" id="sshPort" value="38000">
+                </div>
+                <div>
+                    <label for="codeServerPort">Code Server Port</label>
+                    <input type="number" id="codeServerPort" value="38001">
+                </div>
+                <div>
+                    <label for="jupyterLabPort">Jupyter Lab Port</label>
+                    <input type="number" id="jupyterLabPort" value="38002">
+                </div>
+                <div>
+                    <label for="jupyterNotebookPort">Jupyter Notebook Port</label>
+                    <input type="number" id="jupyterNotebookPort" value="38003">
+                </div>
+                <div>
+                    <label for="ttydPort">TTYD Port</label>
+                    <input type="number" id="ttydPort" value="38004">
+                </div>
+            </div>
+        </div>
+
+        <button onclick="generateCommand()">Generate Command</button>
+
+        <div id="output"></div>
+    </div>
+
+    <script>
+        function generateCommand() {
+            const enableCodeServer = document.getElementById('enableCodeServer').checked;
+            const enableJupyterLab = document.getElementById('enableJupyterLab').checked;
+            const enableJupyterNotebook = document.getElementById('enableJupyterNotebook').checked;
+            const enableTtyd = document.getElementById('enableTtyd').checked;
+
+            const sshPort = document.getElementById('sshPort').value;
+            const codeServerPort = document.getElementById('codeServerPort').value;
+            const jupyterLabPort = document.getElementById('jupyterLabPort').value;
+            const jupyterNotebookPort = document.getElementById('jupyterNotebookPort').value;
+            const ttydPort = document.getElementById('ttydPort').value;
+
+            let envVars = [];
+            if (!enableCodeServer) envVars.push('-e ENABLE_CODE_SERVER=false');
+            if (!enableJupyterLab) envVars.push('-e ENABLE_JUPYTER_LAB=false');
+            if (!enableJupyterNotebook) envVars.push('-e ENABLE_JUPYTER_NOTEBOOK=false');
+            if (!enableTtyd) envVars.push('-e ENABLE_TTYD=false');
+
+            let ports = [];
+            ports.push(`-p ${sshPort}:22`);
+            if (enableCodeServer) ports.push(`-p ${codeServerPort}:38001`);
+            if (enableJupyterLab) ports.push(`-p ${jupyterLabPort}:38002`);
+            if (enableJupyterNotebook) ports.push(`-p ${jupyterNotebookPort}:38003`);
+            if (enableTtyd) ports.push(`-p ${ttydPort}:38004`);
+
+            // Add env vars for ports if they differ from default (optional, but good for consistency if the container uses them)
+            // For now, we assume the container uses fixed internal ports or we map external to internal.
+            // The start.sh uses env vars for ports? Let's check ports.sh.
+            // ports.sh exports vars. We might need to override them if we want to change INTERNAL ports,
+            // but usually docker maps External:Internal.
+            // Let's assume standard internal ports for now or that ports.sh is used inside.
+            // Actually, start.sh sources ports.sh. If we want to change the port the service LISTENS on inside, we need to pass env vars.
+            // But usually we just map external ports.
+            // Let's stick to mapping external ports to the default internal ports defined in ports.sh (which seem to be 38001 etc).
+            // Wait, ports.sh defines the ports used by the services.
+            // So we should map External:38001, External:38002 etc.
+
+            const command = `docker run -d \\
+  --name devlego \\
+  --privileged \\
+  ${envVars.join(' \\\\n  ')} \\
+  ${ports.join(' \\\\n  ')} \\
+  -v $(pwd)/data:/user_data \\
+  voidful/devlego-1`;
+
+            const outputDiv = document.getElementById('output');
+            outputDiv.style.display = 'block';
+            outputDiv.textContent = command;
+        }
+    </script>
+
+</body>
+
+</html>
