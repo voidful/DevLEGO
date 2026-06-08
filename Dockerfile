@@ -37,9 +37,6 @@ RUN bash ./ttyd.sh
 COPY component/conda.sh .
 RUN sudo bash ./conda.sh
 
-COPY component/wg-easy.sh .
-RUN bash ./wg-easy.sh
-
 WORKDIR /home/
 ENV SHELL=/bin/bash
 

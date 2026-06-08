@@ -32,7 +32,6 @@ ENABLE_CODE_SERVER=${ENABLE_CODE_SERVER:-true}
 ENABLE_JUPYTER_LAB=${ENABLE_JUPYTER_LAB:-true}
 ENABLE_JUPYTER_NOTEBOOK=${ENABLE_JUPYTER_NOTEBOOK:-true}
 ENABLE_TTYD=${ENABLE_TTYD:-true}
-ENABLE_WG_EASY=${ENABLE_WG_EASY:-true}
 
 if [ "$ENABLE_CODE_SERVER" = "true" ]; then
     screen -S code-server -dm code-server --host 0.0.0.0 --config /opt/legodev/code-server/code-server.yaml
@@ -54,9 +53,4 @@ if [ "$ENABLE_TTYD" = "true" ]; then
     screen -S ttyd -dm /usr/bin/ttyd -p "${TTYD_PORT}" -c "${USERNAME}:${PASSWORD}" bash
 fi
 
-if [ "$ENABLE_WG_EASY" = "true" ]; then
-    cd /opt/legodev/wg-easy
-    screen -S wg-easy -dm node src/index.js
-fi
 tail -f /dev/null
-
