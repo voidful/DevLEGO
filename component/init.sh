@@ -6,8 +6,9 @@ set -e
 # Read ports
 . /opt/legodev/ports.sh
 
-# Add the backports repository
-echo 'deb http://deb.debian.org/debian buster-backports main' >/etc/apt/sources.list.d/backports.list
+# Make sure stale Debian backports entries are not present on the Ubuntu base image.
+rm -f /etc/apt/sources.list.d/backports.list
+
 curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
 echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list >/dev/null
 
@@ -53,4 +54,3 @@ apt-get install -y "${packages[@]}"
 # Install uv into a global path so later Docker RUN steps can find it.
 curl -LsSf https://astral.sh/uv/install.sh | UV_INSTALL_DIR=/usr/local/bin UV_NO_MODIFY_PATH=1 sh
 uv --version
-
