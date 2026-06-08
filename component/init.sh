@@ -50,7 +50,7 @@ packages=(
 # Download all common packages
 apt-get install -y "${packages[@]}"
 
-# Install uv
-curl -LsSf https://astral.sh/uv/install.sh | sh
-
+# Install uv into a global path so later Docker RUN steps can find it.
+curl -LsSf https://astral.sh/uv/install.sh | UV_INSTALL_DIR=/usr/local/bin UV_NO_MODIFY_PATH=1 sh
+uv --version
 
