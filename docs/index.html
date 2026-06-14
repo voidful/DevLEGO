@@ -1,195 +1,952 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DevLEGO Builder</title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f4f4f9;
-            color: #333;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DevLEGO — assemble your dev environment like LEGO bricks</title>
+<meta name="description" content="DevLEGO is a modular, Docker-based dev environment you assemble like LEGO bricks. Pick the bricks you want, bake them into one GPU-ready container, and reach it from the browser, a web terminal, or SSH.">
+<style>
+  :root{
+    --blue:#3498db;
+    --blue-hover:#2980b9;
+    --slate:#2c3e50;
+    --bg:#f4f4f9;
+    --red:#e74c3c;
+    --yellow:#f1c40f;
+    --green:#2ecc71;
+    --ink:#1f2a36;
+    --muted:#5d6b7a;
+    --line:#e3e8ef;
+    --white:#ffffff;
+    --code-bg:#23303f;
+    --code-ink:#e8edf2;
+    --radius:14px;
+    --radius-sm:10px;
+    --shadow-sm:0 1px 2px rgba(20,33,48,.06),0 2px 8px rgba(20,33,48,.05);
+    --shadow-md:0 8px 24px rgba(20,33,48,.10),0 2px 6px rgba(20,33,48,.06);
+    --shadow-lg:0 20px 50px rgba(20,33,48,.14);
+    --maxw:1120px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    color:var(--ink);
+    background:var(--bg);
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+  }
+  a{color:var(--blue);text-decoration:none}
+  a:hover{color:var(--blue-hover)}
+  img{max-width:100%}
+  h1,h2,h3{color:var(--slate);line-height:1.2;letter-spacing:-.01em}
+  h2{font-size:clamp(1.7rem,3.5vw,2.35rem);margin:0 0 .5rem}
+  p{margin:0 0 1rem}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+  .eyebrow{
+    display:inline-block;font-size:.82rem;font-weight:700;letter-spacing:.08em;
+    text-transform:uppercase;color:var(--blue);margin-bottom:.6rem;
+  }
+  .lede{font-size:1.12rem;color:var(--muted);max-width:62ch;margin:0 auto 0}
+  .section{padding:84px 0}
+  .section-head{text-align:center;margin-bottom:48px}
+  .section-head .lede{margin-left:auto;margin-right:auto}
 
-        h1 {
-            text-align: center;
-            color: #2c3e50;
-        }
+  /* ---- skip link ---- */
+  .skip{
+    position:absolute;left:-9999px;top:0;background:var(--slate);color:#fff;
+    padding:10px 16px;border-radius:0 0 8px 0;z-index:200;
+  }
+  .skip:focus{left:0}
 
-        .container {
-            background: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
+  /* ---- LEGO stud brand mark ---- */
+  .brick{
+    position:relative;display:inline-flex;align-items:center;justify-content:center;
+    width:34px;height:34px;border-radius:8px;background:var(--blue);
+    box-shadow:inset 0 -3px 0 rgba(0,0,0,.12);
+  }
+  .brick::before,.brick::after{
+    content:"";position:absolute;top:5px;width:9px;height:9px;border-radius:50%;
+    background:rgba(255,255,255,.85);box-shadow:0 1px 1px rgba(0,0,0,.12);
+  }
+  .brick::before{left:7px}
+  .brick::after{right:7px}
 
-        .section {
-            margin-bottom: 20px;
-        }
+  /* ---- nav ---- */
+  header.nav{
+    position:sticky;top:0;z-index:100;background:rgba(244,244,249,.82);
+    backdrop-filter:saturate(180%) blur(12px);
+    -webkit-backdrop-filter:saturate(180%) blur(12px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav-inner{display:flex;align-items:center;gap:18px;height:66px;max-width:var(--maxw);margin:0 auto;padding:0 24px}
+  .brand{display:flex;align-items:center;gap:11px;font-weight:800;font-size:1.18rem;color:var(--slate)}
+  .brand span{color:var(--slate)}
+  .brand b{color:var(--blue);font-weight:800}
+  .nav-links{display:flex;gap:6px;margin-left:auto;align-items:center}
+  .nav-links a{
+    color:var(--muted);font-weight:600;font-size:.94rem;padding:8px 12px;border-radius:8px;
+  }
+  .nav-links a:hover{color:var(--slate);background:rgba(52,152,219,.08)}
+  .nav-cta{
+    display:inline-flex;align-items:center;gap:7px;background:var(--slate);color:#fff;
+    padding:9px 16px;border-radius:9px;font-weight:700;font-size:.92rem;
+  }
+  .nav-cta:hover{background:#1f2d3a;color:#fff}
+  .nav-toggle{display:none;margin-left:auto;background:none;border:1px solid var(--line);
+    border-radius:9px;width:42px;height:40px;cursor:pointer;color:var(--slate);font-size:1.3rem;line-height:1}
 
-        .section h2 {
-            margin-bottom: 10px;
-            font-size: 1.2em;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 5px;
-        }
+  /* ---- buttons ---- */
+  .btn{
+    display:inline-flex;align-items:center;gap:9px;font-weight:700;font-size:1rem;
+    padding:14px 24px;border-radius:11px;border:1.5px solid transparent;cursor:pointer;
+    transition:transform .12s ease,background-color .2s ease,box-shadow .2s ease,border-color .2s ease;
+  }
+  .btn:hover{transform:translateY(-1px)}
+  .btn-primary{background:var(--blue);color:#fff;box-shadow:var(--shadow-sm)}
+  .btn-primary:hover{background:var(--blue-hover);color:#fff;box-shadow:var(--shadow-md)}
+  .btn-secondary{background:#fff;color:var(--slate);border-color:var(--line);box-shadow:var(--shadow-sm)}
+  .btn-secondary:hover{color:var(--slate);border-color:#c9d4e0}
+  .btn-ghost{background:transparent;color:var(--slate);border-color:#c9d4e0}
+  .btn-ghost:hover{color:var(--slate);background:rgba(44,62,80,.05)}
+  .btn .gh{width:18px;height:18px;display:inline-block}
 
-        .checkbox-group label {
-            display: block;
-            margin-bottom: 10px;
-            cursor: pointer;
-        }
+  /* ---- hero ---- */
+  .hero{
+    position:relative;overflow:hidden;
+    background:
+      radial-gradient(1100px 520px at 78% -8%,rgba(52,152,219,.16),transparent 60%),
+      radial-gradient(820px 460px at 8% 8%,rgba(46,204,113,.10),transparent 55%),
+      linear-gradient(180deg,#ffffff 0%,#f4f4f9 100%);
+    border-bottom:1px solid var(--line);
+  }
+  .hero-grid{
+    display:grid;grid-template-columns:1.05fr .95fr;gap:56px;align-items:center;
+    padding:88px 0 92px;
+  }
+  .hero h1{
+    font-size:clamp(2.4rem,5.4vw,3.7rem);font-weight:800;margin:0 0 18px;
+    letter-spacing:-.025em;
+  }
+  .hero h1 .accent{color:var(--blue)}
+  .hero .lede{font-size:1.2rem;color:var(--muted);max-width:54ch;margin:0 0 30px}
+  .pill-badge{
+    display:inline-flex;align-items:center;gap:9px;background:#fff;border:1px solid var(--line);
+    box-shadow:var(--shadow-sm);border-radius:999px;padding:7px 15px 7px 9px;
+    font-size:.85rem;font-weight:600;color:var(--slate);margin-bottom:22px;
+  }
+  .pill-badge .dot{width:9px;height:9px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px rgba(46,204,113,.2)}
+  .pill-badge .new{background:var(--red);color:#fff;border-radius:999px;padding:2px 9px;font-size:.72rem;font-weight:800;letter-spacing:.03em}
+  .hero-cta{display:flex;flex-wrap:wrap;gap:14px;margin-top:6px}
+  .hero-note{margin-top:20px;font-size:.9rem;color:var(--muted)}
+  .hero-note code{background:#fff;border:1px solid var(--line);padding:2px 7px;border-radius:6px;font-size:.86em}
 
-        .input-group {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
+  /* hero visual card */
+  .hero-card{
+    background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow-lg);
+    overflow:hidden;position:relative;
+  }
+  .hero-card .bar{
+    display:flex;align-items:center;gap:8px;padding:13px 16px;border-bottom:1px solid var(--line);
+    background:#fbfcfe;
+  }
+  .hero-card .dots{display:flex;gap:6px}
+  .hero-card .dots i{width:11px;height:11px;border-radius:50%;display:inline-block}
+  .hero-card .dots .r{background:#ef6b5e}.hero-card .dots .y{background:#f4c143}.hero-card .dots .g{background:#3fcf6b}
+  .hero-card .bar .ttl{font-size:.82rem;color:var(--muted);font-weight:600;margin-left:6px}
+  .stud-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:18px}
+  .stud{
+    position:relative;border-radius:12px;padding:14px 14px 14px;color:#fff;
+    box-shadow:inset 0 -4px 0 rgba(0,0,0,.13);min-height:78px;display:flex;flex-direction:column;justify-content:flex-end;
+  }
+  .stud::before,.stud::after{
+    content:"";position:absolute;top:9px;width:11px;height:11px;border-radius:50%;
+    background:rgba(255,255,255,.82);box-shadow:0 1px 1px rgba(0,0,0,.14);
+  }
+  .stud::before{left:14px}.stud::after{left:32px}
+  .stud .nm{font-weight:700;font-size:.92rem;line-height:1.15}
+  .stud .pt{font-size:.76rem;opacity:.9;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;margin-top:2px}
+  .stud.b{background:var(--blue)}
+  .stud.g{background:var(--green)}
+  .stud.y{background:#e0b40f}
+  .stud.r{background:var(--red)}
+  .stud.s{background:var(--slate)}
+  .hero-card .foot{
+    border-top:1px solid var(--line);padding:13px 18px;background:#fbfcfe;display:flex;
+    align-items:center;gap:10px;font-size:.82rem;color:var(--muted);
+  }
+  .hero-card .foot .tag{background:#eef5fb;color:var(--blue-hover);font-weight:700;border-radius:7px;padding:3px 9px;font-size:.76rem}
 
-        .input-group label {
-            display: block;
-            margin-bottom: 5px;
-        }
+  /* ---- trust strip ---- */
+  .strip{border-bottom:1px solid var(--line);background:#fff}
+  .strip-inner{display:flex;flex-wrap:wrap;justify-content:center;gap:14px 38px;padding:22px 24px;
+    max-width:var(--maxw);margin:0 auto;font-size:.92rem;color:var(--muted);font-weight:600}
+  .strip-inner span{display:inline-flex;align-items:center;gap:8px}
+  .strip-inner .ic{color:var(--blue)}
 
-        input[type="text"],
-        input[type="number"] {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
+  /* ---- generic card ---- */
+  .card{
+    background:#fff;border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow-sm);transition:transform .15s ease,box-shadow .2s ease,border-color .2s ease;
+  }
+  .card:hover{transform:translateY(-3px);box-shadow:var(--shadow-md);border-color:#d6e0ea}
 
-        button {
-            display: block;
-            width: 100%;
-            padding: 15px;
-            background-color: #3498db;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            font-size: 1.1em;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
+  /* ---- what is ---- */
+  .what-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:8px}
+  .feature{padding:28px 24px}
+  .feature .ico{
+    width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;
+    margin-bottom:16px;box-shadow:inset 0 -3px 0 rgba(0,0,0,.10);
+  }
+  .feature h3{font-size:1.18rem;margin:0 0 8px}
+  .feature p{margin:0;color:var(--muted);font-size:.98rem}
+  .ico.blue{background:rgba(52,152,219,.14);color:var(--blue-hover)}
+  .ico.green{background:rgba(46,204,113,.16);color:#208d4f}
+  .ico.amber{background:rgba(241,196,15,.18);color:#a07c08}
 
-        button:hover {
-            background-color: #2980b9;
-        }
+  /* ---- components ---- */
+  .comp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+  .comp{
+    position:relative;padding:22px 22px 20px;display:flex;flex-direction:column;
+  }
+  .comp-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px}
+  .comp .knob{
+    width:40px;height:24px;border-radius:7px 7px 6px 6px;position:relative;flex:0 0 auto;
+    box-shadow:inset 0 -3px 0 rgba(0,0,0,.12);
+  }
+  .comp .knob::before,.comp .knob::after{
+    content:"";position:absolute;top:-4px;width:9px;height:9px;border-radius:50%;
+    background:rgba(255,255,255,.9);border:1px solid rgba(0,0,0,.06);
+  }
+  .comp .knob::before{left:7px}.comp .knob::after{left:23px}
+  .knob.k-blue{background:var(--blue)}.knob.k-green{background:var(--green)}
+  .knob.k-amber{background:#e6bd14}.knob.k-red{background:var(--red)}.knob.k-slate{background:var(--slate)}
+  .comp h3{font-size:1.08rem;margin:0 0 3px}
+  .comp .desc{color:var(--muted);font-size:.93rem;margin:0 0 14px;flex:1}
+  .comp .port{
+    display:inline-flex;align-items:center;gap:7px;align-self:flex-start;font-weight:700;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.86rem;
+    background:#eef5fb;color:var(--blue-hover);border:1px solid #d6e8f7;border-radius:8px;padding:5px 11px;
+  }
+  .port.always{background:#eafaf1;color:#208d4f;border-color:#cdeedd}
+  .port.cli{background:#f3effb;color:#6b4ec4;border-color:#e3daf6}
+  .port .lbl{font-weight:600;color:inherit;opacity:.8;font-family:inherit}
+  .badge-new{
+    position:absolute;top:-10px;right:16px;background:var(--red);color:#fff;font-size:.7rem;
+    font-weight:800;letter-spacing:.04em;padding:4px 10px;border-radius:999px;box-shadow:var(--shadow-sm);
+    text-transform:uppercase;
+  }
+  .comp.is-new{border-color:#f3c6c0;box-shadow:0 0 0 1px rgba(231,76,60,.08),var(--shadow-sm)}
 
-        #output {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #2c3e50;
-            color: #ecf0f1;
-            border-radius: 4px;
-            font-family: monospace;
-            white-space: pre-wrap;
-            word-break: break-all;
-            display: none;
-        }
-    </style>
+  .legend{display:flex;flex-wrap:wrap;gap:10px 22px;justify-content:center;margin-top:34px;font-size:.86rem;color:var(--muted)}
+  .legend span{display:inline-flex;align-items:center;gap:8px}
+  .legend .sw{width:14px;height:14px;border-radius:4px;display:inline-block}
+
+  /* ---- AI spotlight ---- */
+  .ai{background:var(--slate);color:#eef3f8;border-radius:0}
+  .ai .section-head h2{color:#fff}
+  .ai .section-head .lede{color:#b9c6d4}
+  .ai-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-bottom:34px}
+  .ai-card{
+    background:#34495e;border:1px solid #415368;border-radius:var(--radius);padding:26px 26px;
+  }
+  .ai-card .head{display:flex;align-items:center;gap:13px;margin-bottom:12px}
+  .ai-card .head .knob{width:38px;height:24px}
+  .ai-card h3{color:#fff;margin:0;font-size:1.22rem}
+  .ai-card .pkg{
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.82rem;color:#9fd0f0;margin-top:2px;
+  }
+  .ai-card p{color:#c5d2de;font-size:.96rem;margin:0 0 14px}
+  .ai-card ul{margin:0;padding-left:0;list-style:none}
+  .ai-card li{display:flex;gap:9px;align-items:flex-start;font-size:.93rem;color:#d4dee8;margin-bottom:7px}
+  .ai-card li .ck{color:var(--green);flex:0 0 auto;margin-top:3px}
+  .ai-keys{
+    background:#2a3a4a;border:1px solid #415368;border-radius:var(--radius);padding:24px 26px;
+  }
+  .ai-keys h3{color:#fff;font-size:1.1rem;margin:0 0 6px}
+  .ai-keys p{color:#b9c6d4;font-size:.94rem;margin:0 0 14px}
+  .ai-keys code,.envline{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  .ai-keys .keys{display:flex;flex-wrap:wrap;gap:9px}
+  .keychip{
+    background:#1f2c3a;border:1px solid #3a4d61;border-radius:8px;padding:7px 12px;font-size:.83rem;color:#9fd0f0;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  .keychip.opt{color:#c9b06a;border-color:#544a2c}
+
+  /* ---- code block ---- */
+  .codeblock{
+    background:var(--code-bg);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-md);
+    border:1px solid #1a242f;
+  }
+  .codeblock .ch{
+    display:flex;align-items:center;gap:8px;padding:12px 18px;background:#1c2733;border-bottom:1px solid #2c3a48;
+  }
+  .codeblock .ch .dots i{width:11px;height:11px;border-radius:50%;display:inline-block;margin-right:5px}
+  .codeblock .ch .r{background:#ef6b5e}.codeblock .ch .y{background:#f4c143}.codeblock .ch .g{background:#3fcf6b}
+  .codeblock .ch .lbl{color:#8aa0b4;font-size:.82rem;margin-left:8px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  .codeblock pre{
+    margin:0;padding:22px 22px;overflow-x:auto;color:var(--code-ink);
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.9rem;line-height:1.9;
+  }
+  .codeblock pre code{display:block;white-space:pre}
+  .codeblock .num{color:#5f7387;user-select:none;margin-right:14px}
+  .codeblock .cmt{color:#7d93a6}
+  .codeblock .cmd{color:#8fd1a0}
+  .codeblock .flag{color:#9fd0f0}
+  .codeblock .url{color:#e6c07b}
+  .qs-after{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:18px;color:var(--muted);font-size:.95rem}
+  .qs-after code{background:#fff;border:1px solid var(--line);border-radius:7px;padding:3px 9px;font-size:.86em;color:var(--slate)}
+  .qs-after .open{font-weight:700;color:var(--blue-hover)}
+
+  /* ---- config ---- */
+  .cfg-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;margin-bottom:32px}
+  .cfg{padding:24px 24px}
+  .cfg .file{
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-weight:700;font-size:.98rem;
+    color:var(--slate);display:inline-flex;align-items:center;gap:9px;margin-bottom:8px;
+  }
+  .cfg .file .tk{width:8px;height:18px;border-radius:3px;background:var(--blue)}
+  .cfg.c2 .tk{background:var(--green)}.cfg.c3 .tk{background:#e6bd14}.cfg.c4 .tk{background:var(--red)}
+  .cfg p{margin:0;color:var(--muted);font-size:.95rem}
+  .cfg p code{background:#eef5fb;border:1px solid #d6e8f7;border-radius:6px;padding:1px 6px;font-size:.86em;color:var(--blue-hover);
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  .brick-howto{
+    background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-sm);
+    padding:30px 30px;display:grid;grid-template-columns:1.1fr 1fr;gap:30px;align-items:center;
+  }
+  .brick-howto h3{margin:0 0 8px;font-size:1.3rem}
+  .brick-howto p{color:var(--muted);margin:0 0 14px}
+  .brick-howto ol{margin:0;padding-left:20px;color:var(--slate)}
+  .brick-howto li{margin-bottom:8px}
+  .brick-howto li code{background:#eef5fb;border:1px solid #d6e8f7;border-radius:6px;padding:1px 7px;font-size:.84em;color:var(--blue-hover);
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+
+  /* ---- CTA band ---- */
+  .ctaband{
+    background:linear-gradient(120deg,var(--blue) 0%,#2f78ad 55%,var(--slate) 130%);
+    color:#fff;border-radius:22px;padding:54px 40px;text-align:center;box-shadow:var(--shadow-lg);
+    position:relative;overflow:hidden;
+  }
+  .ctaband h2{color:#fff}
+  .ctaband p{color:rgba(255,255,255,.9);max-width:54ch;margin:0 auto 26px;font-size:1.08rem}
+  .ctaband .hero-cta{justify-content:center}
+  .ctaband .btn-secondary{background:#fff}
+  .ctaband .btn-ghost{color:#fff;border-color:rgba(255,255,255,.55)}
+  .ctaband .btn-ghost:hover{background:rgba(255,255,255,.12);color:#fff}
+  .ctaband .studs{position:absolute;inset:0;pointer-events:none;opacity:.18}
+  .ctaband .studs i{position:absolute;width:18px;height:18px;border-radius:50%;background:#fff}
+  .ctaband .studs i:nth-child(1){top:24px;left:8%}
+  .ctaband .studs i:nth-child(2){top:54px;left:14%}
+  .ctaband .studs i:nth-child(3){bottom:30px;right:10%}
+  .ctaband .studs i:nth-child(4){bottom:64px;right:16%}
+
+  /* ---- footer ---- */
+  footer{background:var(--slate);color:#aebccb;padding:56px 0 30px;margin-top:0}
+  .foot-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:34px;padding-bottom:34px;border-bottom:1px solid #3a4d61}
+  footer h4{color:#fff;font-size:.95rem;margin:0 0 14px;letter-spacing:.02em}
+  footer ul{list-style:none;margin:0;padding:0}
+  footer li{margin-bottom:9px}
+  footer a{color:#aebccb;font-weight:500}
+  footer a:hover{color:#fff}
+  .foot-brand{display:flex;align-items:center;gap:11px;font-weight:800;font-size:1.2rem;color:#fff;margin-bottom:12px}
+  .foot-brand .brick{width:30px;height:30px}
+  .foot-brand .brick::before,.foot-brand .brick::after{top:4px;width:8px;height:8px}
+  .foot-brand .brick::before{left:6px}.foot-brand .brick::after{right:6px}
+  .foot-desc{color:#9fb0c0;font-size:.93rem;max-width:34ch;margin:0}
+  .foot-bottom{display:flex;flex-wrap:wrap;gap:10px 18px;justify-content:space-between;align-items:center;padding-top:22px;font-size:.86rem;color:#8a9bab}
+  .foot-bottom .lic{display:inline-flex;align-items:center;gap:8px}
+  .foot-bottom .lic .mit{background:#3a4d61;color:#d6e0ea;border-radius:6px;padding:2px 9px;font-weight:700;font-size:.78rem}
+
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
+
+  /* ---- copy button ---- */
+  .copy-btn{
+    margin-left:auto;display:inline-flex;align-items:center;gap:6px;cursor:pointer;
+    background:#2c3a48;color:#8aa0b4;border:1px solid #3a4d61;border-radius:7px;
+    padding:5px 11px;font-size:.76rem;font-weight:700;font-family:inherit;line-height:1;
+    transition:color .15s ease,background .15s ease,border-color .15s ease;
+  }
+  .copy-btn:hover{color:#cfe0ee;background:#34465a;border-color:#4a6075}
+  .copy-btn.copied{color:#3fcf6b;border-color:#2f7d4d;background:#1f3328}
+  .copy-btn:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+
+  /* ---- env example ---- */
+  .env-example{margin-top:20px}
+
+  /* ---- tool chip cloud ---- */
+  .toolcloud-wrap{text-align:center;margin:38px auto 0;max-width:780px}
+  .toolcloud-label{font-size:.8rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin:0 0 14px}
+  .toolcloud{display:flex;flex-wrap:wrap;justify-content:center;gap:9px}
+  .toolchip{
+    background:#fff;border:1px solid var(--line);border-radius:8px;padding:6px 12px;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.84rem;
+    color:var(--slate);box-shadow:var(--shadow-sm);
+  }
+
+  /* ---- responsive ---- */
+  @media (max-width:960px){
+    .hero-grid{grid-template-columns:1fr;gap:40px;padding:64px 0 70px}
+    .hero-card{max-width:520px}
+    .what-grid{grid-template-columns:1fr 1fr}
+    .comp-grid{grid-template-columns:1fr 1fr}
+    .ai-grid{grid-template-columns:1fr}
+    .brick-howto{grid-template-columns:1fr;gap:22px}
+    .foot-grid{grid-template-columns:1fr 1fr;gap:28px}
+  }
+  @media (max-width:720px){
+    .nav-links{
+      display:none;position:absolute;top:66px;left:0;right:0;flex-direction:column;gap:2px;
+      background:#fff;border-bottom:1px solid var(--line);padding:14px 18px;box-shadow:var(--shadow-md);
+    }
+    .nav-links.open{display:flex}
+    .nav-links a{padding:11px 12px}
+    .nav-cta{align-self:flex-start;margin-top:6px}
+    .nav-toggle{display:inline-flex;align-items:center;justify-content:center}
+    .section{padding:62px 0}
+    .what-grid{grid-template-columns:1fr}
+    .comp-grid{grid-template-columns:1fr}
+    .cfg-grid{grid-template-columns:1fr}
+    .foot-grid{grid-template-columns:1fr 1fr;gap:24px}
+    .hero-cta .btn{flex:1 1 auto;justify-content:center}
+    .ctaband{padding:44px 22px}
+  }
+  @media (max-width:460px){
+    .stud-grid{grid-template-columns:1fr}
+    .foot-grid{grid-template-columns:1fr}
+  }
+  @media (prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto}
+    .btn:hover,.card:hover{transform:none}
+  }
+</style>
 </head>
-
 <body>
+<a class="skip" href="#main">Skip to main content</a>
 
-    <div class="container">
-        <h1>DevLEGO Builder</h1>
-        <p>Select the components you want to include in your DevLEGO environment and generate the startup command.</p>
+<header class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="#top" aria-label="DevLEGO home">
+      <span class="brick" aria-hidden="true"></span>
+      <span>Dev<b>LEGO</b></span>
+    </a>
+    <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="navLinks">&#9776;</button>
+    <nav class="nav-links" id="navLinks" aria-label="Primary">
+      <a href="#what">What is it</a>
+      <a href="#components">Components</a>
+      <a href="#ai">AI CLIs</a>
+      <a href="#quickstart">Quickstart</a>
+      <a href="#config">Configuration</a>
+      <a class="nav-cta" href="builder.html">Open the Builder</a>
+    </nav>
+  </div>
+</header>
 
-        <div class="section">
-            <h2>Components</h2>
-            <div class="checkbox-group">
-                <label>
-                    <input type="checkbox" id="enableCodeServer" checked> Enable Code Server (VS Code)
-                </label>
-                <label>
-                    <input type="checkbox" id="enableJupyterLab" checked> Enable Jupyter Lab
-                </label>
-                <label>
-                    <input type="checkbox" id="enableJupyterNotebook" checked> Enable Jupyter Notebook
-                </label>
-                <label>
-                    <input type="checkbox" id="enableTtyd" checked> Enable TTYD (Web Terminal)
-                </label>
-            </div>
+<main id="main">
+<span id="top"></span>
+
+<!-- ===================== HERO ===================== -->
+<section class="hero" aria-labelledby="hero-title">
+  <div class="wrap">
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <span class="pill-badge">
+          <span class="dot" aria-hidden="true"></span>
+          v0.2.0 — now with AI coding CLIs
+          <span class="new">NEW</span>
+        </span>
+        <h1 id="hero-title">Assemble your dev environment <span class="accent">like LEGO bricks.</span></h1>
+        <p class="lede">DevLEGO is a modular, Docker-based development environment. Pick the bricks you want, snap them together, and bake them into one GPU-ready container you reach from the browser, a web terminal, or SSH.</p>
+        <div class="hero-cta">
+          <a class="btn btn-primary" href="#quickstart">Get Started</a>
+          <a class="btn btn-secondary" href="builder.html">Open the Builder</a>
+          <a class="btn btn-ghost" href="https://github.com/voidful/DevLEGO" rel="noopener">
+            <svg class="gh" viewBox="0 0 16 16" aria-hidden="true" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+            View on GitHub
+          </a>
         </div>
+        <p class="hero-note">Built on the NVIDIA base image <code>nvcr.io/nvidia/mxnet:24.06-py3</code> — CUDA-ready out of the box.</p>
+      </div>
 
-        <div class="section">
-            <h2>Ports Configuration</h2>
-            <div class="input-group">
-                <div>
-                    <label for="sshPort">SSH Port</label>
-                    <input type="number" id="sshPort" value="38000">
-                </div>
-                <div>
-                    <label for="codeServerPort">Code Server Port</label>
-                    <input type="number" id="codeServerPort" value="38001">
-                </div>
-                <div>
-                    <label for="jupyterLabPort">Jupyter Lab Port</label>
-                    <input type="number" id="jupyterLabPort" value="38002">
-                </div>
-                <div>
-                    <label for="jupyterNotebookPort">Jupyter Notebook Port</label>
-                    <input type="number" id="jupyterNotebookPort" value="38003">
-                </div>
-                <div>
-                    <label for="ttydPort">TTYD Port</label>
-                    <input type="number" id="ttydPort" value="38004">
-                </div>
-            </div>
+      <div class="hero-visual">
+        <div class="hero-card" role="img" aria-label="Illustration of DevLEGO bricks: Code Server on port 38001, JupyterLab on 38002, ttyd on 38004, and an SSH server on 38000, snapped together into one container.">
+          <div class="bar">
+            <span class="dots" aria-hidden="true"><i class="r"></i><i class="y"></i><i class="g"></i></span>
+            <span class="ttl">voidful/devlego-1 &mdash; one container, your bricks</span>
+          </div>
+          <div class="stud-grid">
+            <div class="stud b"><span class="nm">Code Server</span><span class="pt">:38001</span></div>
+            <div class="stud g"><span class="nm">JupyterLab</span><span class="pt">:38002</span></div>
+            <div class="stud y"><span class="nm">ttyd terminal</span><span class="pt">:38004</span></div>
+            <div class="stud s"><span class="nm">SSH server</span><span class="pt">:38000</span></div>
+          </div>
+          <div class="foot">
+            <span class="tag">Pre-installed</span>
+            Claude Code &middot; Codex &middot; Conda &middot; uv &middot; git
+          </div>
         </div>
+      </div>
+    </div>
+  </div>
+</section>
 
-        <button onclick="generateCommand()">Generate Command</button>
+<!-- ===================== TRUST STRIP ===================== -->
+<div class="strip" aria-label="At a glance">
+  <div class="strip-inner">
+    <span><span class="ic" aria-hidden="true">&#9632;</span> One Docker image</span>
+    <span><span class="ic" aria-hidden="true">&#9632;</span> GPU-ready (NVIDIA base)</span>
+    <span><span class="ic" aria-hidden="true">&#9632;</span> Browser, web terminal &amp; SSH</span>
+    <span><span class="ic" aria-hidden="true">&#9632;</span> MIT licensed</span>
+  </div>
+</div>
 
-        <div id="output"></div>
+<!-- ===================== WHAT IS ===================== -->
+<section class="section" id="what" aria-labelledby="what-title">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">What is DevLEGO</span>
+      <h2 id="what-title">One container, built from the bricks you pick</h2>
+      <p class="lede">Every tool is a brick: a small shell script in <code>component/</code>. Choose the bricks you want, and DevLEGO bakes them into a single image you open in a browser tab, a web terminal, or over SSH &mdash; all running on a GPU-ready NVIDIA Docker base so your CUDA workloads just work.</p>
+    </div>
+    <div class="what-grid">
+      <article class="card feature">
+        <div class="ico blue" aria-hidden="true">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="7" height="6" rx="1"/><rect x="14" y="8" width="7" height="6" rx="1"/><path d="M5 8V6.5M8 8V6.5M16 8V6.5M19 8V6.5"/><rect x="8.5" y="14" width="7" height="6" rx="1"/><path d="M10.5 14v-1.5M13.5 14v-1.5"/></svg>
+        </div>
+        <h3>Modular by design</h3>
+        <p>Each component is one shell script. Add, remove, or rearrange bricks without touching the rest of your setup.</p>
+      </article>
+      <article class="card feature">
+        <div class="ico green" aria-hidden="true">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M3 9h18M7 14h6M8 22h8M12 18v4"/></svg>
+        </div>
+        <h3>Reach it anywhere</h3>
+        <p>Full IDEs and notebooks in the browser, a terminal in a tab, plus an always-on SSH server for remote shells and tunneling.</p>
+      </article>
+      <article class="card feature">
+        <div class="ico amber" aria-hidden="true">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13a8 8 0 0 1 16 0"/><path d="M2 13h20M12 5V3M12 13l4-3"/><circle cx="12" cy="13" r="1.6"/></svg>
+        </div>
+        <h3>GPU-ready</h3>
+        <p>Built on <code>nvcr.io/nvidia/mxnet:24.06-py3</code> with a GPU reservation in Compose, so accelerated workloads run from the start.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== COMPONENTS ===================== -->
+<section class="section" id="components" style="background:#fff;border-top:1px solid var(--line);border-bottom:1px solid var(--line)" aria-labelledby="comp-title">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">The bricks</span>
+      <h2 id="comp-title">Pick your components</h2>
+      <p class="lede">The four service bricks default to ON &mdash; disable any with its <code>ENABLE_*</code> environment variable set to <code>false</code>. SSH always runs. The AI CLIs are always installed in every terminal.</p>
     </div>
 
-    <script>
-        function generateCommand() {
-            const enableCodeServer = document.getElementById('enableCodeServer').checked;
-            const enableJupyterLab = document.getElementById('enableJupyterLab').checked;
-            const enableJupyterNotebook = document.getElementById('enableJupyterNotebook').checked;
-            const enableTtyd = document.getElementById('enableTtyd').checked;
+    <div class="comp-grid">
 
-            const sshPort = document.getElementById('sshPort').value;
-            const codeServerPort = document.getElementById('codeServerPort').value;
-            const jupyterLabPort = document.getElementById('jupyterLabPort').value;
-            const jupyterNotebookPort = document.getElementById('jupyterNotebookPort').value;
-            const ttydPort = document.getElementById('ttydPort').value;
+      <article class="card comp">
+        <div class="comp-top">
+          <div><h3>Code Server</h3></div>
+          <span class="knob k-blue" aria-hidden="true"></span>
+        </div>
+        <p class="desc">VS Code in the browser &mdash; a full IDE in a tab. <span style="color:var(--slate);font-weight:600">Toggle:</span> <code style="font-size:.86em">ENABLE_CODE_SERVER=false</code></p>
+        <span class="port"><span class="lbl">port</span> 38001</span>
+      </article>
 
-            let envVars = [];
-            if (!enableCodeServer) envVars.push('-e ENABLE_CODE_SERVER=false');
-            if (!enableJupyterLab) envVars.push('-e ENABLE_JUPYTER_LAB=false');
-            if (!enableJupyterNotebook) envVars.push('-e ENABLE_JUPYTER_NOTEBOOK=false');
-            if (!enableTtyd) envVars.push('-e ENABLE_TTYD=false');
+      <article class="card comp">
+        <div class="comp-top">
+          <div><h3>JupyterLab</h3></div>
+          <span class="knob k-green" aria-hidden="true"></span>
+        </div>
+        <p class="desc">Notebooks plus a full IDE workspace. <span style="color:var(--slate);font-weight:600">Toggle:</span> <code style="font-size:.86em">ENABLE_JUPYTER_LAB=false</code></p>
+        <span class="port"><span class="lbl">port</span> 38002</span>
+      </article>
 
-            let ports = [];
-            ports.push(`-p ${sshPort}:22`);
-            if (enableCodeServer) ports.push(`-p ${codeServerPort}:38001`);
-            if (enableJupyterLab) ports.push(`-p ${jupyterLabPort}:38002`);
-            if (enableJupyterNotebook) ports.push(`-p ${jupyterNotebookPort}:38003`);
-            if (enableTtyd) ports.push(`-p ${ttydPort}:38004`);
+      <article class="card comp">
+        <div class="comp-top">
+          <div><h3>Jupyter Notebook</h3></div>
+          <span class="knob k-green" aria-hidden="true"></span>
+        </div>
+        <p class="desc">The classic notebook interface. <span style="color:var(--slate);font-weight:600">Toggle:</span> <code style="font-size:.86em">ENABLE_JUPYTER_NOTEBOOK=false</code></p>
+        <span class="port"><span class="lbl">port</span> 38003</span>
+      </article>
 
-            const command = `docker run -d \\
-  --name devlego \\
-  --privileged \\
-  ${envVars.join(' \\ \n  ')} \\
-  ${ports.join(' \\ \n  ')} \\
-  -v $(pwd)/data:/user_data \\
-  voidful/devlego-1`;
+      <article class="card comp">
+        <div class="comp-top">
+          <div><h3>ttyd</h3></div>
+          <span class="knob k-amber" aria-hidden="true"></span>
+        </div>
+        <p class="desc">A full terminal in a browser tab. <span style="color:var(--slate);font-weight:600">Toggle:</span> <code style="font-size:.86em">ENABLE_TTYD=false</code></p>
+        <span class="port"><span class="lbl">port</span> 38004</span>
+      </article>
 
-            const outputDiv = document.getElementById('output');
-            outputDiv.style.display = 'block';
-            outputDiv.textContent = command;
+      <article class="card comp">
+        <div class="comp-top">
+          <div><h3>SSH server</h3></div>
+          <span class="knob k-slate" aria-hidden="true"></span>
+        </div>
+        <p class="desc">Remote shell and tunneling. Always on &mdash; there is no toggle to disable it.</p>
+        <span class="port"><span class="lbl">port</span> 38000</span>
+      </article>
+
+      <article class="card comp">
+        <div class="comp-top">
+          <div><h3>Conda</h3></div>
+          <span class="knob k-green" aria-hidden="true"></span>
+        </div>
+        <p class="desc">Miniconda environment manager, always installed. No port needed.</p>
+        <span class="port always"><span class="lbl">status</span> always installed</span>
+      </article>
+
+      <article class="card comp">
+        <div class="comp-top">
+          <div><h3>uv</h3></div>
+          <span class="knob k-green" aria-hidden="true"></span>
+        </div>
+        <p class="desc">Fast Python package and environment manager, always installed. No port needed.</p>
+        <span class="port always"><span class="lbl">status</span> always installed</span>
+      </article>
+
+      <article class="card comp is-new">
+        <span class="badge-new">New &middot; pre-installed</span>
+        <div class="comp-top">
+          <div><h3>Claude Code</h3></div>
+          <span class="knob k-red" aria-hidden="true"></span>
+        </div>
+        <p class="desc">Anthropic's agentic coding CLI (<code style="font-size:.86em">@anthropic-ai/claude-code</code>), ready in any terminal. No port, no toggle.</p>
+        <span class="port cli"><span class="lbl">access</span> CLI</span>
+      </article>
+
+      <article class="card comp is-new">
+        <span class="badge-new">New &middot; pre-installed</span>
+        <div class="comp-top">
+          <div><h3>Codex</h3></div>
+          <span class="knob k-red" aria-hidden="true"></span>
+        </div>
+        <p class="desc">OpenAI's coding CLI (<code style="font-size:.86em">@openai/codex</code>), ready in any terminal. No port, no toggle.</p>
+        <span class="port cli"><span class="lbl">access</span> CLI</span>
+      </article>
+
+    </div>
+
+    <div class="toolcloud-wrap">
+      <p class="toolcloud-label">Also baked into every image</p>
+      <div class="toolcloud">
+        <span class="toolchip">git</span>
+        <span class="toolchip">git-lfs</span>
+        <span class="toolchip">vim</span>
+        <span class="toolchip">nano</span>
+        <span class="toolchip">htop</span>
+        <span class="toolchip">ncdu</span>
+        <span class="toolchip">cmake</span>
+        <span class="toolchip">build-essential</span>
+        <span class="toolchip">g++</span>
+        <span class="toolchip">ffmpeg</span>
+        <span class="toolchip">wget</span>
+        <span class="toolchip">curl</span>
+        <span class="toolchip">screen</span>
+      </div>
+    </div>
+
+    <div class="legend" aria-hidden="true">
+      <span><span class="sw" style="background:var(--blue)"></span> Service brick (browser)</span>
+      <span><span class="sw" style="background:var(--green)"></span> Always installed</span>
+      <span><span class="sw" style="background:var(--slate)"></span> Always on</span>
+      <span><span class="sw" style="background:var(--red)"></span> AI CLI (new in 0.2.0)</span>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== AI SPOTLIGHT ===================== -->
+<section class="section ai" id="ai" aria-labelledby="ai-title">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow" style="color:#7fc6f5">New in 0.2.0</span>
+      <h2 id="ai-title">Agentic coding, pre-installed</h2>
+      <p class="lede">Claude Code and Codex ship inside the image &mdash; available in every terminal, with no port and no toggle. Drop in your API keys and start prompting.</p>
+    </div>
+
+    <div class="ai-grid">
+      <article class="ai-card">
+        <div class="head">
+          <span class="knob k-red" aria-hidden="true"></span>
+          <div>
+            <h3>Claude Code</h3>
+            <div class="pkg">@anthropic-ai/claude-code</div>
+          </div>
+        </div>
+        <p>Anthropic's agentic coding CLI &mdash; ready to use in any DevLEGO terminal the moment the container boots.</p>
+        <ul>
+          <li><span class="ck" aria-hidden="true">&#10003;</span> Pre-installed; no port and no toggle</li>
+          <li><span class="ck" aria-hidden="true">&#10003;</span> Auth via <code>ANTHROPIC_API_KEY</code></li>
+          <li><span class="ck" aria-hidden="true">&#10003;</span> Optional <code>ANTHROPIC_AUTH_TOKEN</code> and <code>ANTHROPIC_BASE_URL</code></li>
+        </ul>
+      </article>
+
+      <article class="ai-card">
+        <div class="head">
+          <span class="knob k-red" aria-hidden="true"></span>
+          <div>
+            <h3>Codex</h3>
+            <div class="pkg">@openai/codex</div>
+          </div>
+        </div>
+        <p>OpenAI's coding CLI &mdash; also baked in and available everywhere, alongside Conda, uv, and the rest of your toolchain.</p>
+        <ul>
+          <li><span class="ck" aria-hidden="true">&#10003;</span> Pre-installed; no port and no toggle</li>
+          <li><span class="ck" aria-hidden="true">&#10003;</span> Auth via <code>OPENAI_API_KEY</code></li>
+          <li><span class="ck" aria-hidden="true">&#10003;</span> Optional <code>CODEX_API_KEY</code> for a single <code>codex exec</code> run</li>
+        </ul>
+      </article>
+    </div>
+
+    <div class="ai-keys">
+      <h3>Supplying your keys</h3>
+      <p>Provide API keys via a <code>.env</code> file next to <code>docker-compose.yml</code> (Compose auto-loads it) or through your host shell. Start by copying <code>.env.example</code> to <code>.env</code>. Unset keys are simply omitted from the container, so every key is optional.</p>
+      <div class="keys">
+        <span class="keychip">ANTHROPIC_API_KEY</span>
+        <span class="keychip opt">ANTHROPIC_AUTH_TOKEN</span>
+        <span class="keychip opt">ANTHROPIC_BASE_URL</span>
+        <span class="keychip">OPENAI_API_KEY</span>
+        <span class="keychip opt">CODEX_API_KEY</span>
+      </div>
+      <div class="codeblock env-example" aria-label="Example .env file">
+        <div class="ch">
+          <span class="dots" aria-hidden="true"><i class="r"></i><i class="y"></i><i class="g"></i></span>
+          <span class="lbl">.env</span>
+        </div>
+<pre><code><span class="cmt"># .env &mdash; sits next to docker-compose.yml, auto-loaded by Compose</span>
+ANTHROPIC_API_KEY=sk-ant-...
+OPENAI_API_KEY=sk-...
+<span class="cmt"># optional overrides (leave out what you don't need):</span>
+<span class="cmt"># ANTHROPIC_BASE_URL=https://your-gateway.example.com</span></code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== QUICKSTART ===================== -->
+<section class="section" id="quickstart" aria-labelledby="qs-title">
+  <div class="wrap" style="max-width:880px">
+    <div class="section-head">
+      <span class="eyebrow">Quickstart</span>
+      <h2 id="qs-title">Up and running in five steps</h2>
+      <p class="lede">Copy and paste. Note the Compose V2 syntax &mdash; <code>docker compose</code>, two words.</p>
+    </div>
+
+    <div class="codeblock">
+      <div class="ch">
+        <span class="dots" aria-hidden="true"><i class="r"></i><i class="y"></i><i class="g"></i></span>
+        <span class="lbl">bash</span>
+      </div>
+<pre><code><span class="num">1</span><span class="cmt"># Clone the repo and step in</span>
+<span class="num"> </span><span class="cmd">git</span> clone <span class="url">https://github.com/voidful/DevLEGO.git</span> &amp;&amp; <span class="cmd">cd</span> DevLEGO
+
+<span class="num">2</span><span class="cmt"># Create the Docker network</span>
+<span class="num"> </span><span class="cmd">docker</span> network create devlego
+
+<span class="num">3</span><span class="cmt"># Copy the env template (add API keys if you want the AI CLIs authenticated &mdash; optional)</span>
+<span class="num"> </span><span class="cmd">cp</span> .env.example .env
+
+<span class="num">4</span><span class="cmt"># Build and start everything in the background</span>
+<span class="num"> </span><span class="cmd">docker</span> compose up <span class="flag">-d</span> <span class="flag">--build</span>
+
+<span class="num">5</span><span class="cmt"># Open Code Server in your browser &mdash; default password: changeme</span>
+<span class="num"> </span><span class="cmd">open</span> <span class="url">http://localhost:38001</span></code></pre>
+    </div>
+
+    <div class="qs-after">
+      <span class="open">&#8594;</span>
+      Open <a href="http://localhost:38001" rel="noopener"><strong>http://localhost:38001</strong></a> for Code Server. Default credentials from <code>docker-compose.yml</code>: <code>USERNAME=devlego</code>, <code>PASSWORD=changeme</code> &mdash; change these before exposing it.
+    </div>
+
+    <div class="qs-after" style="margin-top:10px">
+      <span class="open">&#8594;</span>
+      Prefer to pick your ports first? <a href="builder.html"><strong>Use the Builder</strong></a> to generate a ready-to-paste <code>docker run</code> command.
+    </div>
+  </div>
+</section>
+
+<!-- ===================== CONFIGURATION ===================== -->
+<section class="section" id="config" style="background:#fff;border-top:1px solid var(--line)" aria-labelledby="cfg-title">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Configuration</span>
+      <h2 id="cfg-title">Tune it &mdash; or make your own brick</h2>
+      <p class="lede">Everything is plain shell scripts and YAML. Change credentials, ports, and versions in a few files, flip the <code>ENABLE_*</code> toggles, or add a brick of your own.</p>
+    </div>
+
+    <div class="cfg-grid">
+      <article class="card cfg">
+        <span class="file"><span class="tk" aria-hidden="true"></span>docker-compose.yml</span>
+        <p>Username and password, mounted volumes, the GPU reservation, and the API-key environment passthrough for the AI CLIs.</p>
+      </article>
+      <article class="card cfg c2">
+        <span class="file"><span class="tk" aria-hidden="true"></span>ports.sh</span>
+        <p>Host and container port numbers for every service brick &mdash; SSH on <code>38000</code> through ttyd on <code>38004</code>.</p>
+      </article>
+      <article class="card cfg c3">
+        <span class="file"><span class="tk" aria-hidden="true"></span>versions.sh</span>
+        <p>Pinned tool versions and VS Code extension versions, so your environment is reproducible across rebuilds.</p>
+      </article>
+      <article class="card cfg c4">
+        <span class="file"><span class="tk" aria-hidden="true"></span>ENABLE_* toggles</span>
+        <p>The four service bricks default to ON. Set any <code>ENABLE_*</code> variable to <code>false</code> to leave that brick out. SSH always runs.</p>
+      </article>
+    </div>
+
+    <div class="brick-howto">
+      <div>
+        <h3>Build your own brick</h3>
+        <p>A component is just a shell script in <code>component/</code>. Drop yours in, wire two lines into the Dockerfile, and rebuild &mdash; your brick snaps into the same container as the rest.</p>
+        <ol>
+          <li>Add a script: <code>component/my-tool.sh</code></li>
+          <li>Add a <code>COPY</code> line to the Dockerfile</li>
+          <li>Add a <code>RUN</code> line to execute it during the build</li>
+          <li><code>docker compose up -d --build</code></li>
+        </ol>
+      </div>
+      <div class="codeblock" aria-label="Example component directory">
+        <div class="ch">
+          <span class="dots" aria-hidden="true"><i class="r"></i><i class="y"></i><i class="g"></i></span>
+          <span class="lbl">component/</span>
+        </div>
+<pre><code><span class="cmt"># one script per brick</span>
+<span class="flag">component/</span>code-server.sh
+<span class="flag">component/</span>jupyter.sh
+<span class="flag">component/</span>ttyd.sh
+<span class="flag">component/</span>ai-cli.sh
+<span class="cmt"># &#8230; drop your own here</span>
+<span class="flag">component/</span>my-tool.sh</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== CTA BAND ===================== -->
+<section class="section" aria-labelledby="cta-title">
+  <div class="wrap">
+    <div class="ctaband">
+      <div class="studs" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+      <h2 id="cta-title">Snap your stack together</h2>
+      <p>Pick the bricks, bake the image, and code from anywhere. Start in five commands, or design your container visually in the Builder.</p>
+      <div class="hero-cta">
+        <a class="btn btn-secondary" href="#quickstart">Get Started</a>
+        <a class="btn btn-ghost" href="builder.html">Open the Builder</a>
+        <a class="btn btn-ghost" href="https://github.com/voidful/DevLEGO" rel="noopener">
+          <svg class="gh" viewBox="0 0 16 16" aria-hidden="true" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+          View on GitHub
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ===================== FOOTER ===================== -->
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <div class="foot-brand">
+          <span class="brick" aria-hidden="true"></span>
+          <span>Dev<span style="color:var(--blue)">LEGO</span></span>
+        </div>
+        <p class="foot-desc">A modular, Docker-based development environment you assemble like LEGO bricks. GPU-ready and reachable from the browser, a web terminal, or SSH.</p>
+      </div>
+      <div>
+        <h4>Project</h4>
+        <ul>
+          <li><a href="https://github.com/voidful/DevLEGO" rel="noopener">GitHub repository</a></li>
+          <li><a href="builder.html">The Builder</a></li>
+          <li><a href="#quickstart">Quickstart</a></li>
+          <li><a href="#components">Components</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Learn</h4>
+        <ul>
+          <li><a href="#what">What is DevLEGO</a></li>
+          <li><a href="#ai">AI CLIs</a></li>
+          <li><a href="#config">Configuration</a></li>
+          <li><a href="https://github.com/voidful/DevLEGO" rel="noopener">Make your own brick</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>About</h4>
+        <ul>
+          <li><a href="https://github.com/voidful" rel="noopener">voidful (Eric Lam)</a></li>
+          <li><a href="https://github.com/voidful/DevLEGO/blob/main/LICENSE" rel="noopener">MIT License</a></li>
+          <li><a href="https://github.com/voidful/DevLEGO" rel="noopener">Image: voidful/devlego-1</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>&copy; 2026 DevLEGO &middot; v0.2.0 &middot; Built by <a href="https://github.com/voidful" rel="noopener">voidful</a>.</span>
+      <span class="lic">Released under the <span class="mit">MIT</span> license. LEGO is a trademark of the LEGO Group; this project is not affiliated.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  (function () {
+    var toggle = document.getElementById('navToggle');
+    var links = document.getElementById('navLinks');
+    if (toggle && links) {
+      toggle.addEventListener('click', function () {
+        var open = links.classList.toggle('open');
+        toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      });
+      links.addEventListener('click', function (e) {
+        if (e.target.tagName === 'A') {
+          links.classList.remove('open');
+          toggle.setAttribute('aria-expanded', 'false');
         }
-    </script>
+      });
+    }
 
+    // Copy-to-clipboard on every code block (with execCommand fallback)
+    function fallbackCopy(text, done) {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly', '');
+      ta.style.position = 'absolute';
+      ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); done(); } catch (e) { /* no-op */ }
+      document.body.removeChild(ta);
+    }
+    document.querySelectorAll('.codeblock').forEach(function (block) {
+      var head = block.querySelector('.ch');
+      var pre = block.querySelector('pre');
+      if (!head || !pre) return;
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'copy-btn';
+      btn.setAttribute('aria-label', 'Copy to clipboard');
+      btn.textContent = 'Copy';
+      head.appendChild(btn);
+      btn.addEventListener('click', function () {
+        var clone = pre.cloneNode(true);
+        clone.querySelectorAll('.num').forEach(function (n) { n.remove(); });
+        var text = clone.textContent.replace(/\n{3,}/g, '\n\n').trim();
+        var done = function () {
+          btn.textContent = 'Copied!';
+          btn.classList.add('copied');
+          setTimeout(function () { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1800);
+        };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(done, function () { fallbackCopy(text, done); });
+        } else {
+          fallbackCopy(text, done);
+        }
+      });
+    });
+  })();
+</script>
 </body>
-
 </html>

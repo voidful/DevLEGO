@@ -8,6 +8,20 @@ services:
     environment:
       - USERNAME=devlego
       - PASSWORD=changeme
+      # --- AI coding CLI credentials -------------------------------------
+      # Passed through from the host shell or a .env file next to this
+      # compose file. The bare "- VAR" form omits the variable from the
+      # container entirely when it is unset (it is NOT set to an empty
+      # string), so leaving any of these blank is safe.
+      # Claude Code (@anthropic-ai/claude-code):
+      - ANTHROPIC_API_KEY
+      - ANTHROPIC_AUTH_TOKEN   # optional: bearer-token gateways/proxies
+      - ANTHROPIC_BASE_URL     # optional: custom/proxied API endpoint
+      # Codex (@openai/codex):
+      - OPENAI_API_KEY
+      - CODEX_API_KEY          # optional: API key for `codex exec` (CI)
+      # Note: Codex's base URL is a config.toml key (openai_base_url),
+      # not an env var, so there is no OPENAI_BASE_URL passthrough here.
     privileged: true
     restart: always
     stdin_open: true

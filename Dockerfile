@@ -31,6 +31,9 @@ RUN bash ./code-server.sh
 COPY component/jupyter.sh .
 RUN bash ./jupyter.sh
 
+COPY component/ai-cli.sh .
+RUN bash ./ai-cli.sh
+
 COPY component/ttyd.sh .
 RUN bash ./ttyd.sh
 

@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DevLEGO Builder — generate your docker run command</title>
+<meta name="description" content="Pick your DevLEGO components and ports, then copy a ready-to-paste docker run command.">
+<style>
+  :root{
+    --blue:#3498db;--blue-hover:#2980b9;--slate:#2c3e50;--bg:#f4f4f9;
+    --red:#e74c3c;--yellow:#f1c40f;--green:#2ecc71;
+    --ink:#1f2a36;--muted:#5d6b7a;--line:#e3e8ef;
+    --code-bg:#23303f;--code-ink:#e8edf2;
+    --radius:14px;--radius-sm:10px;
+    --shadow-sm:0 1px 2px rgba(20,33,48,.06),0 2px 8px rgba(20,33,48,.05);
+    --shadow-md:0 8px 24px rgba(20,33,48,.10),0 2px 6px rgba(20,33,48,.06);
+    --maxw:900px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    color:var(--ink);background:var(--bg);line-height:1.6;-webkit-font-smoothing:antialiased}
+  a{color:var(--blue);text-decoration:none}
+  a:hover{color:var(--blue-hover)}
+  h1{color:var(--slate);font-size:clamp(1.9rem,4vw,2.5rem);letter-spacing:-.02em;margin:0 0 .4rem}
+  h2{color:var(--slate);font-size:1.15rem;margin:0 0 16px}
+  code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.86em;
+    background:#eef5fb;border:1px solid #d6e8f7;border-radius:6px;padding:1px 6px;color:var(--blue-hover)}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+  .eyebrow{display:inline-block;font-size:.8rem;font-weight:700;letter-spacing:.08em;
+    text-transform:uppercase;color:var(--blue);margin-bottom:.5rem}
+  .lede{font-size:1.08rem;color:var(--muted);margin:0}
+  .skip{position:absolute;left:-9999px;top:0;background:var(--slate);color:#fff;padding:10px 16px;border-radius:0 0 8px 0;z-index:200}
+  .skip:focus{left:0}
+
+  /* brand mark */
+  .brick{position:relative;display:inline-flex;width:34px;height:34px;border-radius:8px;background:var(--blue);
+    box-shadow:inset 0 -3px 0 rgba(0,0,0,.12)}
+  .brick::before,.brick::after{content:"";position:absolute;top:5px;width:9px;height:9px;border-radius:50%;
+    background:rgba(255,255,255,.85);box-shadow:0 1px 1px rgba(0,0,0,.12)}
+  .brick::before{left:7px}.brick::after{right:7px}
+
+  /* nav */
+  header.nav{position:sticky;top:0;z-index:100;background:rgba(244,244,249,.82);
+    backdrop-filter:saturate(180%) blur(12px);-webkit-backdrop-filter:saturate(180%) blur(12px);
+    border-bottom:1px solid var(--line)}
+  .nav-inner{display:flex;align-items:center;gap:18px;height:66px;max-width:1120px;margin:0 auto;padding:0 24px}
+  .brand{display:flex;align-items:center;gap:11px;font-weight:800;font-size:1.18rem;color:var(--slate)}
+  .brand b{color:var(--blue)}
+  .nav-links{display:flex;gap:6px;margin-left:auto;align-items:center}
+  .nav-links a{color:var(--muted);font-weight:600;font-size:.94rem;padding:8px 12px;border-radius:8px}
+  .nav-links a:hover{color:var(--slate);background:rgba(52,152,219,.08)}
+  .nav-cta{background:var(--slate);color:#fff !important;padding:9px 16px;border-radius:9px;font-weight:700;font-size:.92rem}
+  .nav-cta:hover{background:#1f2d3a}
+
+  /* buttons */
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;font-weight:700;font-size:1rem;
+    padding:14px 24px;border-radius:11px;border:1.5px solid transparent;cursor:pointer;
+    transition:transform .12s ease,background-color .2s ease,box-shadow .2s ease}
+  .btn:hover{transform:translateY(-1px)}
+  .btn-primary{background:var(--blue);color:#fff;box-shadow:var(--shadow-sm);width:100%}
+  .btn-primary:hover{background:var(--blue-hover);box-shadow:var(--shadow-md)}
+
+  .builder-wrap{padding:44px 24px 80px}
+  .back{display:inline-flex;align-items:center;gap:7px;font-weight:600;font-size:.92rem;color:var(--muted);margin-bottom:22px}
+  .back:hover{color:var(--blue)}
+  .builder-head{margin-bottom:28px}
+
+  .panel{background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow-md);padding:30px 30px 32px}
+  .fieldset{padding:22px 0;border-bottom:1px solid var(--line)}
+  .fieldset:first-child{padding-top:0}
+  .checks{display:flex;flex-direction:column;gap:12px}
+  .checks label,.inline{display:flex;align-items:flex-start;gap:11px;cursor:pointer;font-size:.98rem;color:var(--ink)}
+  .checks input,.inline input{margin-top:3px;width:17px;height:17px;accent-color:var(--blue);cursor:pointer;flex:0 0 auto}
+  .checks b,.inline b{color:var(--slate)}
+  .note{font-size:.9rem;color:var(--muted);margin:16px 0 0;background:#f6f9fc;border:1px solid var(--line);
+    border-radius:10px;padding:12px 14px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .grid2 label{display:flex;flex-direction:column;gap:6px;font-size:.86rem;font-weight:600;color:var(--slate)}
+  .grid2 input{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:9px;font-size:.95rem;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--ink);background:#fbfcfe}
+  .grid2 input:focus{outline:2px solid rgba(52,152,219,.4);outline-offset:1px;border-color:var(--blue)}
+  .gen{margin-top:26px}
+
+  /* code output */
+  .codeblock{background:var(--code-bg);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-md);
+    border:1px solid #1a242f;margin-top:24px}
+  .codeblock .ch{display:flex;align-items:center;gap:8px;padding:12px 16px;background:#1c2733;border-bottom:1px solid #2c3a48}
+  .codeblock .dots i{width:11px;height:11px;border-radius:50%;display:inline-block;margin-right:5px}
+  .codeblock .r{background:#ef6b5e}.codeblock .y{background:#f4c143}.codeblock .g{background:#3fcf6b}
+  .codeblock .lbl{color:#8aa0b4;font-size:.82rem;margin-left:8px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  .codeblock pre{margin:0;padding:20px;overflow-x:auto;color:var(--code-ink);
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.9rem;line-height:1.75}
+  .codeblock pre code{white-space:pre}
+  .copy-btn{margin-left:auto;display:inline-flex;align-items:center;gap:6px;cursor:pointer;
+    background:#2c3a48;color:#8aa0b4;border:1px solid #3a4d61;border-radius:7px;padding:5px 11px;
+    font-size:.76rem;font-weight:700;line-height:1;transition:color .15s ease,background .15s ease,border-color .15s ease}
+  .copy-btn:hover{color:#cfe0ee;background:#34465a;border-color:#4a6075}
+  .copy-btn.copied{color:#3fcf6b;border-color:#2f7d4d;background:#1f3328}
+  .copy-btn:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+
+  @media (max-width:640px){
+    .nav-links a:not(.nav-cta){display:none}
+    .grid2{grid-template-columns:1fr}
+    .panel{padding:22px 18px 24px}
+  }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to main content</a>
+
+<header class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html" aria-label="DevLEGO home">
+      <span class="brick" aria-hidden="true"></span>
+      <span>Dev<b>LEGO</b></span>
+    </a>
+    <nav class="nav-links" aria-label="Primary">
+      <a href="index.html">Overview</a>
+      <a href="index.html#components">Components</a>
+      <a href="index.html#quickstart">Quickstart</a>
+      <a class="nav-cta" href="https://github.com/voidful/DevLEGO" rel="noopener">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main" class="wrap builder-wrap">
+  <a class="back" href="index.html">&#8592; Back to overview</a>
+  <div class="builder-head">
+    <span class="eyebrow">Builder</span>
+    <h1>DevLEGO Builder</h1>
+    <p class="lede">Select the bricks and ports you want, then copy the generated <code>docker run</code> command. Prefer Compose? Follow the <a href="index.html#quickstart">Quickstart</a> instead.</p>
+  </div>
+
+  <div class="panel">
+    <section class="fieldset">
+      <h2>Components</h2>
+      <div class="checks">
+        <label><input type="checkbox" id="enableCodeServer" checked> <span><b>Code Server</b> &mdash; VS Code in the browser <code>:38001</code></span></label>
+        <label><input type="checkbox" id="enableJupyterLab" checked> <span><b>JupyterLab</b> <code>:38002</code></span></label>
+        <label><input type="checkbox" id="enableJupyterNotebook" checked> <span><b>Jupyter Notebook</b> <code>:38003</code></span></label>
+        <label><input type="checkbox" id="enableTtyd" checked> <span><b>ttyd</b> &mdash; full terminal in a browser tab <code>:38004</code></span></label>
+      </div>
+      <p class="note">&#129521; <b>Claude Code</b> and <b>Codex</b> CLIs are pre-installed in every build &mdash; no port, no toggle. An <b>SSH server</b> always runs on <code>:38000</code>.</p>
+    </section>
+
+    <section class="fieldset">
+      <h2>Ports</h2>
+      <div class="grid2">
+        <label>SSH Port <input type="number" id="sshPort" value="38000"></label>
+        <label>Code Server Port <input type="number" id="codeServerPort" value="38001"></label>
+        <label>JupyterLab Port <input type="number" id="jupyterLabPort" value="38002"></label>
+        <label>Jupyter Notebook Port <input type="number" id="jupyterNotebookPort" value="38003"></label>
+        <label>ttyd Port <input type="number" id="ttydPort" value="38004"></label>
+      </div>
+    </section>
+
+    <section class="fieldset">
+      <h2>AI CLI keys</h2>
+      <label class="inline"><input type="checkbox" id="includeKeys" checked> <span>Pass <code>ANTHROPIC_API_KEY</code> and <code>OPENAI_API_KEY</code> from your shell into the container</span></label>
+      <p class="note">Uses the bare <code>-e VAR</code> form &mdash; if a variable isn't set in your shell, Docker simply doesn't pass it in.</p>
+    </section>
+
+    <button class="btn btn-primary gen" type="button" onclick="generateCommand()">Generate command</button>
+
+    <div class="codeblock" id="outputWrap" hidden>
+      <div class="ch">
+        <span class="dots" aria-hidden="true"><i class="r"></i><i class="y"></i><i class="g"></i></span>
+        <span class="lbl">docker run</span>
+        <button type="button" class="copy-btn" id="copyBtn" aria-label="Copy command to clipboard">Copy</button>
+      </div>
+<pre><code id="output"></code></pre>
+    </div>
+  </div>
+</main>
+
+<script>
+  function byId(id){ return document.getElementById(id); }
+
+  function generateCommand(){
+    var enableCodeServer = byId('enableCodeServer').checked;
+    var enableJupyterLab = byId('enableJupyterLab').checked;
+    var enableJupyterNotebook = byId('enableJupyterNotebook').checked;
+    var enableTtyd = byId('enableTtyd').checked;
+    var includeKeys = byId('includeKeys').checked;
+
+    var sshPort = byId('sshPort').value || '38000';
+    var codeServerPort = byId('codeServerPort').value || '38001';
+    var jupyterLabPort = byId('jupyterLabPort').value || '38002';
+    var jupyterNotebookPort = byId('jupyterNotebookPort').value || '38003';
+    var ttydPort = byId('ttydPort').value || '38004';
+
+    var lines = ['docker run -d', '--name devlego', '--privileged'];
+
+    if(!enableCodeServer) lines.push('-e ENABLE_CODE_SERVER=false');
+    if(!enableJupyterLab) lines.push('-e ENABLE_JUPYTER_LAB=false');
+    if(!enableJupyterNotebook) lines.push('-e ENABLE_JUPYTER_NOTEBOOK=false');
+    if(!enableTtyd) lines.push('-e ENABLE_TTYD=false');
+
+    if(includeKeys){
+      lines.push('-e ANTHROPIC_API_KEY');
+      lines.push('-e OPENAI_API_KEY');
+    }
+
+    lines.push('-p ' + sshPort + ':22');
+    if(enableCodeServer) lines.push('-p ' + codeServerPort + ':38001');
+    if(enableJupyterLab) lines.push('-p ' + jupyterLabPort + ':38002');
+    if(enableJupyterNotebook) lines.push('-p ' + jupyterNotebookPort + ':38003');
+    if(enableTtyd) lines.push('-p ' + ttydPort + ':38004');
+
+    lines.push('-v $(pwd)/data:/user_data');
+    lines.push('voidful/devlego-1');
+
+    byId('output').textContent = lines.join(' \\\n  ');
+    byId('outputWrap').hidden = false;
+  }
+
+  (function(){
+    var btn = byId('copyBtn');
+    function fallbackCopy(text, done){
+      var ta = document.createElement('textarea');
+      ta.value = text; ta.setAttribute('readonly','');
+      ta.style.position = 'absolute'; ta.style.left = '-9999px';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); done(); } catch(e){ /* no-op */ }
+      document.body.removeChild(ta);
+    }
+    btn.addEventListener('click', function(){
+      var text = byId('output').textContent;
+      if(!text) return;
+      var done = function(){
+        btn.textContent = 'Copied!'; btn.classList.add('copied');
+        setTimeout(function(){ btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 1800);
+      };
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(done, function(){ fallbackCopy(text, done); });
+      } else { fallbackCopy(text, done); }
+    });
+  })();
+</script>
+</body>
+</html>

@@ -19,3 +19,5 @@ export APOLLO_EXTENSION_VERSION="2.6.3" # https://marketplace.visualstudio.com/i
 export VIM_EXTENSION_VERSION="1.32.1" # https://open-vsx.org/extension/vscodevim/vim (Latest as of Jun 2025)
 export POWERSHELL_EXTENSION_VERSION="2025.4.0" # https://github.com/PowerShell/vscode-powershell/releases (Latest as of Jun 2025)
 export SCSS_EXTENSION_VERSION="0.10.0" # https://github.com/mrmlnc/vscode-scss/releases (No newer release found as of Apr 2025)
+export CLAUDE_CODE_VERSION="latest" # https://www.npmjs.com/package/@anthropic-ai/claude-code (npm, Anthropic Claude Code CLI)
+export CODEX_VERSION="latest" # https://www.npmjs.com/package/@openai/codex (npm, OpenAI Codex CLI)

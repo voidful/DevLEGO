@@ -1,0 +1,5 @@
+# Secrets — never commit real API keys
+.env
+
+# Local container data volume (docker-compose.yml mounts ./data)
+/data/
